@@ -249,6 +249,7 @@ cursor-mem start
 ## 11. More
 
 - **Design**: [DESIGN.md](DESIGN.md) (English) / [DESIGN_CN.md](DESIGN_CN.md) (中文)
+- **3-layer workflow**: [THREE_LAYER_WORKFLOW.md](THREE_LAYER_WORKFLOW.md) (English) / [THREE_LAYER_WORKFLOW_CN.md](THREE_LAYER_WORKFLOW_CN.md) (中文)
 - **Roadmap**: [ROADMAP.md](ROADMAP.md) (English) / [ROADMAP_CN.md](ROADMAP_CN.md) (中文)
 - **Testing**: [TESTING.md](../TESTING.md)
 - **README**: [README.md](../README.md) / [README_CN.md](../README_CN.md)

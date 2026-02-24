@@ -258,6 +258,7 @@ cursor-mem start
 ## 11. 更多资源
 
 - **设计文档**：[DESIGN_CN.md](DESIGN_CN.md)（中文） / [DESIGN.md](DESIGN.md)（English）
+- **三层工作流实现原理**：[THREE_LAYER_WORKFLOW_CN.md](THREE_LAYER_WORKFLOW_CN.md)（中文） / [THREE_LAYER_WORKFLOW.md](THREE_LAYER_WORKFLOW.md)（English）
 - **路线图**：[ROADMAP_CN.md](ROADMAP_CN.md)（中文） / [ROADMAP.md](ROADMAP.md)（English）
 - **测试说明**：[TESTING.md](../TESTING.md)
 - **README**：仓库根目录 [README.md](../README.md) / [README_CN.md](../README_CN.md)

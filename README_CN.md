@@ -159,6 +159,7 @@ cursor-mem/
 | 文档 | English | 中文 |
 |------|---------|------|
 | **设计文档** | [DESIGN.md](docs/DESIGN.md) | [DESIGN_CN.md](docs/DESIGN_CN.md) |
+| **三层工作流** | [THREE_LAYER_WORKFLOW.md](docs/THREE_LAYER_WORKFLOW.md) | [THREE_LAYER_WORKFLOW_CN.md](docs/THREE_LAYER_WORKFLOW_CN.md) |
 | **路线图** | [ROADMAP.md](docs/ROADMAP.md) | [ROADMAP_CN.md](docs/ROADMAP_CN.md) |
 | **用户手册** | [USER_MANUAL.md](docs/USER_MANUAL.md) | [USER_MANUAL_CN.md](docs/USER_MANUAL_CN.md) |
 
