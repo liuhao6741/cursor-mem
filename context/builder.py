@@ -57,6 +57,15 @@ def build_context(conn: sqlite3.Connection, project: str, config: Config | None 
         used_tokens += estimate_tokens(file_section)
         sections.append(file_section)
 
+    mcp_hint = (
+        "\n## 查询更多历史\n\n"
+        "如需更多历史细节，使用 MCP 三层检索（~10x token 节省）：\n"
+        "1. `memory_search(query)` → 紧凑索引\n"
+        "2. `memory_timeline(anchor=ID)` → 上下文\n"
+        "3. `memory_get(ids=[...])` → 完整详情\n"
+    )
+    sections.append(mcp_hint)
+
     footer = f"\n---\n*cursor-mem auto-updated | {datetime.now().strftime(DISPLAY_FMT)}*\n"
     sections.append(footer)
 
@@ -159,9 +168,9 @@ def _adaptive_budget(conn: sqlite3.Connection, project: str, config: Config) -> 
     stats = session_store.get_session_stats(conn, project=project)
     total = stats.get("sessions_total", 0) or 0
     if total <= 1:
-        return min(base, 1500)
+        return min(base, 1200)
     elif total <= 5:
-        return min(base, 2500)
+        return min(base, 2000)
     return base
 
 

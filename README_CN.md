@@ -14,7 +14,7 @@
 - **零配置即用**：安装后无需 API Key，使用规则化压缩自动工作
 - **AI 增强可选**：配置 OpenAI 兼容 API（如 Gemini 免费版）获得更智能的摘要
 - **全文搜索**：FTS5 搜索历史操作和会话
-- **MCP 工具**：Agent 可主动查询项目历史（`memory_search`、`memory_timeline`、`memory_get`）
+- **MCP 工具**：三层检索工作流（约 10x token 节省）— `memory_search`（紧凑索引）、`memory_timeline`（锚点上下文）、`memory_get`（完整详情）、以及 `memory_important`（工作流指引）
 - **Web 查看器**：浏览器查看记忆流，实时更新
 - **多项目隔离**：按项目分别管理记忆
 
@@ -121,13 +121,16 @@ cursor-mem config set ai.model "gpt-4o-mini"
 
 ---
 
-## MCP 工具
+## MCP 工具（三层工作流）
 
-安装时自动注册到 `~/.cursor/mcp.json`，提供 3 个工具：
+安装时自动注册到 `~/.cursor/mcp.json`。按**三层模式**使用可实现约 10x token 节省：
 
-- `memory_search(query)` — 搜索历史
-- `memory_timeline(session_id?)` — 时间线视图
-- `memory_get(ids)` — 获取详情
+1. **memory_important** — 工作流指引（始终可见）。请先阅读。
+2. **memory_search(query, project?, type?, limit?, offset?, dateStart?, dateEnd?, orderBy?)** — **步骤 1**：紧凑索引（ID、时间、标题、类型）。约 50–100 tokens/条。
+3. **memory_timeline(anchor?, depth_before?, depth_after?, query?, session_id?, project?, limit?)** — **步骤 2**：围绕某条观察的上下文。用 `anchor`（观察 ID）配合深度。约 100–200 tokens/条。
+4. **memory_get(ids, orderBy?, limit?)** — **步骤 3**：仅对筛选后的 ID 取完整详情。约 500–1000 tokens/条。
+
+请勿在未通过 search/timeline 筛选前直接拉取完整详情。
 
 ---
 

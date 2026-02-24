@@ -178,11 +178,18 @@ async def search_observations_route(
     type: str | None = None,
     limit: int = 20,
     offset: int = 0,
+    dateStart: str | None = None,
+    dateEnd: str | None = None,
+    orderBy: str = "relevance",
 ):
     if not q:
         return {"results": []}
     conn = _get_conn(request)
-    results = search.search_observations(conn, q, project=project, obs_type=type, limit=limit, offset=offset)
+    results = search.search_observations(
+        conn, q, project=project, obs_type=type,
+        limit=limit, offset=offset,
+        date_start=dateStart, date_end=dateEnd, order_by=orderBy,
+    )
     return {"results": results, "query": q}
 
 
@@ -205,26 +212,54 @@ async def timeline(
     request: Request,
     project: str | None = None,
     session_id: str | None = None,
+    anchor: int | None = None,
+    depth_before: int = 3,
+    depth_after: int = 3,
+    q: str | None = None,
     limit: int = 30,
 ):
-    """Chronological timeline of observations."""
+    """Chronological timeline of observations with optional anchor support."""
     conn = _get_conn(request)
-    if session_id:
+
+    anchor_id = anchor
+    if anchor_id is None and q:
+        from cursor_mem.storage import search as search_mod
+        results = search_mod.search_observations(conn, q, project=project, limit=1)
+        if results:
+            anchor_id = results[0]["id"]
+
+    if anchor_id is not None:
+        obs = observation_store.get_observations_around(
+            conn, anchor_id,
+            depth_before=depth_before,
+            depth_after=depth_after,
+            project=project,
+        )
+    elif session_id:
         obs = observation_store.get_observations_for_session(conn, session_id, limit=limit)
     else:
         obs = observation_store.get_recent_observations(conn, project=project, limit=limit)
-    obs.reverse()
-    return {"timeline": obs}
+        obs.reverse()
+
+    return {"timeline": obs, "anchor": anchor_id}
 
 
 @router.get("/api/observations/batch")
-async def get_observations_batch(request: Request, ids: str = ""):
+async def get_observations_batch(
+    request: Request,
+    ids: str = "",
+    orderBy: str = "date_asc",
+    limit: int = 50,
+):
     """Get observations by comma-separated IDs."""
     if not ids:
         return {"observations": []}
     conn = _get_conn(request)
     id_list = [int(i.strip()) for i in ids.split(",") if i.strip().isdigit()]
     obs = observation_store.get_observations_by_ids(conn, id_list)
+    if orderBy == "date_desc":
+        obs = list(reversed(obs))
+    obs = obs[:limit]
     return {"observations": obs}
 
 

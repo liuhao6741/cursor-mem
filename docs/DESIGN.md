@@ -10,7 +10,7 @@ cursor-mem is a **persistent memory system for Cursor IDE**. It works without an
 - **Zero-config**: Works out of the box with rule-based compression; no API key required
 - **Optional AI summarization**: Plug in any OpenAI-compatible API (e.g. free Gemini) for smarter session summaries
 - **Full-text search**: SQLite FTS5 over observations and sessions
-- **Agent-queryable**: MCP tools for the agent to query project history (`memory_search`, `memory_timeline`, `memory_get`)
+- **Agent-queryable**: MCP tools with a **3-layer progressive disclosure workflow** (~10x token savings): compact index → anchor context → full details
 - **Multi-project isolation**: Separate storage and context injection per project
 
 ### 1.2 Tech Stack
@@ -86,7 +86,7 @@ Agent stops
 
 In addition:
 
-- **MCP Server** (`cursor_mem.mcp.server`) talks to Cursor over stdio and uses the same SQLite, search, observation_store, and session_store to implement `memory_search`, `memory_timeline`, and `memory_get`.
+- **MCP Server** (`cursor_mem.mcp.server`) talks to Cursor over stdio and uses the same SQLite, search, observation_store, and session_store to implement the 4 tools: `memory_important`, `memory_search`, `memory_timeline`, `memory_get` (3-layer workflow).
 - **Web Viewer** uses the Worker’s `/api/*` and `/api/events` (SSE) to browse sessions and timeline with live updates.
 
 ---
@@ -96,7 +96,7 @@ In addition:
 ### 3.1 Config (config.py)
 
 - **Paths**: Data dir from `CURSOR_MEM_DATA_DIR` or `~/.cursor-mem`; under it: `config.json`, `cursor-mem.db`, `logs/`, `worker.pid`.
-- **Options**: `port` (default 37800), `context_budget`, `max_sessions_in_context`, `log_level`, `ai.*` (enabled, base_url, api_key, model).
+- **Options**: `port` (default 37800), `context_budget` (default 3000, reduced for 3-layer MCP usage), `max_sessions_in_context`, `log_level`, `ai.*` (enabled, base_url, api_key, model).
 - Dotted keys for `config set/get` (e.g. `ai.enabled`).
 
 ### 3.2 Installer & process (installer.py)
@@ -135,7 +135,7 @@ Turns raw hook payloads into a unified structure for storage and context:
 
 ### 3.6 Context build & inject (context/)
 
-- **builder.build_context(conn, project, config)**: Adaptive budget by project session count; assemble header, recent session summaries, latest session observations (deduped), project key files (top 15 by frequency), footer with local time; truncate sections to budget; use time_display.utc_to_local.
+- **builder.build_context(conn, project, config)**: Adaptive budget by project session count; assemble header, recent session summaries, latest session observations (deduped), project key files (top 15 by frequency), **MCP usage hint** (3-layer workflow), footer with local time; truncate sections to budget; use time_display.utc_to_local.
 - **injector.inject_context(project_root, context_markdown)**: Write `.cursor/rules/cursor-mem.mdc` with MDC header (alwaysApply, description).
 
 ### 3.7 Session & summarization (worker/session_manager.py, summarizer/)
@@ -159,7 +159,12 @@ Turns raw hook payloads into a unified structure for storage and context:
 ### 3.9 MCP (mcp/server.py)
 
 - JSON-RPC 2.0 over stdio; handle `initialize`, `tools/list`, `tools/call`.
-- Tools: **memory_search** (FTS over observations + sessions), **memory_timeline** (chronological observations, local time), **memory_get** (observation details by ids).
+- **3-layer workflow** (progressive disclosure, ~10x token savings):
+  1. **memory_important** — Always-visible workflow guide. Tells the agent to search first, then timeline, then get details.
+  2. **memory_search** (Layer 1) — FTS over observations + sessions. Returns a **compact table** (ID, short time, title truncated to 60 chars, type). Params: `query`, `project`, `type`, `limit`, `offset`, `dateStart`, `dateEnd`, `orderBy` (relevance | date_desc | date_asc). ~50–100 tokens/result.
+  3. **memory_timeline** (Layer 2) — Chronological context around an observation. Params: `anchor` (observation ID), `depth_before`, `depth_after`; or `query` to find anchor; or fallback `session_id`/`project`/`limit`. Uses `get_observations_around` in observation_store. ~100–200 tokens/entry.
+  4. **memory_get** (Layer 3) — Full observation details by ids. Params: `ids`, `orderBy`, `limit`. Content truncated to 2000 chars with “(truncated)”. ~500–1000 tokens/observation.
+- Storage: **search.search_observations** supports `date_start`, `date_end`, `order_by`; **observation_store.get_observations_around** returns observations before/anchor/after by `created_at`.
 
 ---
 

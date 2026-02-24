@@ -14,7 +14,7 @@ Tired of re-explaining "where we left off" in every new chat? cursor-mem gives C
 - **Zero-config**: Works out of the box with rule-based compression; no API key required
 - **Optional AI summarization**: Use any OpenAI-compatible API (e.g. free Gemini) for smarter summaries
 - **Full-text search**: FTS5 search over observations and sessions
-- **MCP tools**: Agent can query project history (`memory_search`, `memory_timeline`, `memory_get`)
+- **MCP tools**: 3-layer search workflow (~10x token savings) — `memory_search` (compact index), `memory_timeline` (anchor context), `memory_get` (full details), plus `memory_important` (workflow guide)
 - **Web viewer**: Browse memory stream in the browser with live updates
 - **Multi-project isolation**: Separate memory per project
 
@@ -121,13 +121,16 @@ After install, open http://127.0.0.1:37800 for:
 
 ---
 
-## MCP tools
+## MCP tools (3-layer workflow)
 
-Registered in `~/.cursor/mcp.json` on install:
+Registered in `~/.cursor/mcp.json` on install. Follow the **3-layer pattern** for ~10x token savings:
 
-- `memory_search(query)` — search history
-- `memory_timeline(session_id?)` — timeline view
-- `memory_get(ids)` — fetch observation details
+1. **memory_important** — Workflow guide (always visible). Read first.
+2. **memory_search(query, project?, type?, limit?, offset?, dateStart?, dateEnd?, orderBy?)** — **Step 1**: Compact index (ID, time, title, type). ~50–100 tokens/result.
+3. **memory_timeline(anchor?, depth_before?, depth_after?, query?, session_id?, project?, limit?)** — **Step 2**: Context around an observation. Use `anchor` (observation ID) with depths. ~100–200 tokens/entry.
+4. **memory_get(ids, orderBy?, limit?)** — **Step 3**: Full details only for filtered IDs. ~500–1000 tokens/observation.
+
+Never fetch full details without filtering via search/timeline first.
 
 ---
 

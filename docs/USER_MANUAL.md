@@ -78,7 +78,7 @@ cursor-mem config get port                # One key
 cursor-mem config get ai.enabled
 
 cursor-mem config set port 37800
-cursor-mem config set context_budget 4000
+cursor-mem config set context_budget 3000
 cursor-mem config set max_sessions_in_context 3
 cursor-mem config set log_level INFO
 ```
@@ -88,7 +88,7 @@ cursor-mem config set log_level INFO
 | Key | Description | Default |
 |-----|-------------|---------|
 | port | Worker port | 37800 |
-| context_budget | Token budget for injected context (~4 chars/token) | 4000 |
+| context_budget | Token budget for injected context (~4 chars/token) | 3000 |
 | max_sessions_in_context | Number of recent completed sessions to inject | 3 |
 | log_level | Log level | INFO |
 | ai.enabled | Enable AI summarization | false |
@@ -153,19 +153,30 @@ You can:
 
 ---
 
-## 6. MCP tools (for the agent)
+## 6. MCP tools (3-layer workflow)
 
-In Cursor, the agent can call:
+cursor-mem exposes **4 MCP tools** following a **3-layer progressive disclosure** pattern for ~10x token savings. The agent should **search first → timeline for context → get details only for filtered IDs**.
 
-- **memory_search(query, project?, type?, limit?)**
-  - Search observations and session summaries by keywords.
-  - Optional: project, type (shell/file_edit/mcp/prompt), limit.
-- **memory_timeline(session_id?, project?, limit?)**
-  - Chronological observations; optional session or project filter.
-- **memory_get(ids)**
-  - Full observation content (content, files, time) by observation IDs.
+1. **memory_important** (workflow guide)
+   - No parameters. Returns the 3-layer workflow reminder. Always visible in the tool list; read this first.
 
-These use the same SQLite DB as the Worker, so no extra setup is needed; after install and Cursor restart, the agent can “recall” past work.
+2. **memory_search** — Step 1: compact index (~50–100 tokens/result)
+   - **query** (required), **project**, **type** (shell | file_edit | mcp | prompt), **limit**, **offset**
+   - **dateStart**, **dateEnd** (YYYY-MM-DD), **orderBy** (relevance | date_desc | date_asc)
+   - Returns a table: ID, short time, title (truncated), type. Use this to find relevant observation IDs.
+
+3. **memory_timeline** — Step 2: context around an observation (~100–200 tokens/entry)
+   - **anchor** (observation ID) + **depth_before**, **depth_after** (default 3) — timeline centered on that ID
+   - **query** — optional; if no anchor, search is used to find an anchor automatically
+   - **session_id**, **project**, **limit** — fallback when not using anchor
+   - Returns a short timeline; the anchor line is marked with `>>>`.
+
+4. **memory_get** — Step 3: full details (~500–1000 tokens/observation)
+   - **ids** (required), **orderBy** (date_asc | date_desc), **limit**
+   - Full content and files; content is truncated at 2000 characters with “(truncated)”.
+   - **Only call after filtering** with search or timeline to avoid token waste.
+
+These use the same SQLite DB as the Worker; after install and Cursor restart, the agent can recall past work efficiently.
 
 ---
 
@@ -175,7 +186,7 @@ cursor-mem writes “recent session summaries + latest operations + project key 
 
 **`<project-root>/.cursor/rules/cursor-mem.mdc`**
 
-This file has `alwaysApply: true`, so Cursor loads it every conversation and the agent sees recent history without calling MCP every time.
+This file has `alwaysApply: true`, so Cursor loads it every conversation. It also includes a short **MCP usage hint** (3-layer workflow) so the agent knows to query history via `memory_search` → `memory_timeline` → `memory_get` when more detail is needed.
 
 ---
 

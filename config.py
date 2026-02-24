@@ -38,7 +38,7 @@ class AIConfig:
 @dataclass
 class Config:
     port: int = DEFAULT_PORT
-    context_budget: int = 4000
+    context_budget: int = 3000
     max_sessions_in_context: int = 3
     log_level: str = "INFO"
     ai: AIConfig = field(default_factory=AIConfig)

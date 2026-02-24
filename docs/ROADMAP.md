@@ -44,6 +44,13 @@ This document describes version planning and feature evolution for cursor-mem.
   - memory_search: full-text search over observations and sessions
   - memory_timeline: timeline by session or project
   - memory_get: observation details by ID
+- **3-layer search workflow** (~10x token savings)
+  - memory_important: always-visible workflow guide
+  - memory_search (Layer 1): compact index table, dateStart/dateEnd/orderBy/offset
+  - memory_timeline (Layer 2): anchor + depth_before/depth_after, or query-based anchor
+  - memory_get (Layer 3): full details with content truncation, orderBy/limit
+  - Storage: get_observations_around, search with date range and order
+  - Context: default budget 3000, MCP usage hint in injected rules
 - **Optional AI summarization**
   - Any OpenAI-compatible API (e.g. Gemini)
   - Fallback to rule-based on failure

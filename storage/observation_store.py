@@ -84,6 +84,62 @@ def get_observations_by_ids(
     return [_row_to_dict(r) for r in rows]
 
 
+def get_observations_around(
+    conn: sqlite3.Connection,
+    anchor_id: int,
+    depth_before: int = 3,
+    depth_after: int = 3,
+    project: str | None = None,
+) -> list[dict[str, Any]]:
+    """Get observations around an anchor observation ID.
+
+    Returns depth_before observations before the anchor, the anchor itself,
+    and depth_after observations after it, ordered chronologically.
+    """
+    anchor_row = conn.execute(
+        "SELECT created_at, session_id FROM observations WHERE id = ?", (anchor_id,)
+    ).fetchone()
+    if not anchor_row:
+        return []
+
+    anchor_ts = anchor_row["created_at"]
+    anchor_session = anchor_row["session_id"]
+
+    if project:
+        session_filter = (
+            " AND o.session_id IN "
+            "(SELECT id FROM sessions WHERE project = ?)"
+        )
+        project_params: tuple = (project,)
+    else:
+        session_filter = ""
+        project_params = ()
+
+    before_rows = conn.execute(
+        f"SELECT o.* FROM observations o "
+        f"WHERE (o.created_at < ? OR (o.created_at = ? AND o.id < ?)){session_filter} "
+        f"ORDER BY o.created_at DESC, o.id DESC LIMIT ?",
+        (anchor_ts, anchor_ts, anchor_id, *project_params, depth_before),
+    ).fetchall()
+
+    anchor_full = conn.execute(
+        "SELECT * FROM observations WHERE id = ?", (anchor_id,)
+    ).fetchone()
+
+    after_rows = conn.execute(
+        f"SELECT o.* FROM observations o "
+        f"WHERE (o.created_at > ? OR (o.created_at = ? AND o.id > ?)){session_filter} "
+        f"ORDER BY o.created_at ASC, o.id ASC LIMIT ?",
+        (anchor_ts, anchor_ts, anchor_id, *project_params, depth_after),
+    ).fetchall()
+
+    result = [_row_to_dict(r) for r in reversed(before_rows)]
+    if anchor_full:
+        result.append(_row_to_dict(anchor_full))
+    result.extend(_row_to_dict(r) for r in after_rows)
+    return result
+
+
 def count_observations(conn: sqlite3.Connection, session_id: str) -> int:
     row = conn.execute(
         "SELECT COUNT(*) as cnt FROM observations WHERE session_id = ?", (session_id,)

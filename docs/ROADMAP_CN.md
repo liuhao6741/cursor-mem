@@ -44,6 +44,13 @@
   - memory_search：全文搜索观察与会话
   - memory_timeline：按会话或项目的时间线
   - memory_get：按 ID 获取观察详情
+- **三层检索工作流**（约 10x token 节省）
+  - memory_important：始终可见的工作流指引
+  - memory_search（第一层）：紧凑索引表，dateStart/dateEnd/orderBy/offset
+  - memory_timeline（第二层）：anchor + depth_before/depth_after，或基于 query 的锚点
+  - memory_get（第三层）：完整详情与 content 截断，orderBy/limit
+  - 存储：get_observations_around，搜索支持日期范围与排序
+  - 上下文：默认 budget 3000，注入规则中增加 MCP 使用提示
 - **可选 AI 摘要**
   - 支持任意 OpenAI 兼容 API（含 Gemini 等）
   - 失败时回退到规则摘要

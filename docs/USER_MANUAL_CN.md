@@ -87,7 +87,7 @@ cursor-mem config get ai.enabled
 
 # 修改配置
 cursor-mem config set port 37800
-cursor-mem config set context_budget 4000
+cursor-mem config set context_budget 3000
 cursor-mem config set max_sessions_in_context 3
 cursor-mem config set log_level INFO
 ```
@@ -97,7 +97,7 @@ cursor-mem config set log_level INFO
 | 键 | 说明 | 默认 |
 |----|------|------|
 | port | Worker 端口 | 37800 |
-| context_budget | 注入上下文的 token 预算（约 4 字符/token） | 4000 |
+| context_budget | 注入上下文的 token 预算（约 4 字符/token） | 3000 |
 | max_sessions_in_context | 注入的最近完成会话数 | 3 |
 | log_level | 日志级别 | INFO |
 | ai.enabled | 是否启用 AI 摘要 | false |
@@ -162,19 +162,30 @@ Worker 启动后，在浏览器打开：
 
 ---
 
-## 6. MCP 工具（Agent 使用）
+## 6. MCP 工具（三层工作流）
 
-在 Cursor 中，Agent 可调用以下工具查询记忆：
+cursor-mem 提供 **4 个 MCP 工具**，采用**三层渐进式披露**，约 10x token 节省。Agent 应先 **search 索引 → timeline 取上下文 → 仅对筛选出的 ID 再 get 详情**。
 
-- **memory_search(query, project?, type?, limit?)**
-  - 按关键词搜索观察与会话摘要。
-  - 可选：project、type（shell/file_edit/mcp/prompt）、limit。
-- **memory_timeline(session_id?, project?, limit?)**
-  - 按时间顺序查看观察；可指定会话或项目。
-- **memory_get(ids)**
-  - 根据观察 ID 列表获取完整内容（含 content、files、时间等）。
+1. **memory_important**（工作流指引）
+   - 无参数。返回三层工作流说明。始终出现在工具列表中，请先阅读。
 
-这些工具使用与 Worker 相同的 SQLite 数据库，因此无需额外配置；安装并重启 Cursor 后即可在对话中让 Agent「回忆」之前做过什么。
+2. **memory_search** — 步骤 1：紧凑索引（约 50–100 tokens/条）
+   - **query**（必填）、**project**、**type**（shell | file_edit | mcp | prompt）、**limit**、**offset**
+   - **dateStart**、**dateEnd**（YYYY-MM-DD）、**orderBy**（relevance | date_desc | date_asc）
+   - 返回表格：ID、短时间、标题（截断）、类型。用于筛选出感兴趣的观察 ID。
+
+3. **memory_timeline** — 步骤 2：围绕某条观察的上下文（约 100–200 tokens/条）
+   - **anchor**（观察 ID）+ **depth_before**、**depth_after**（默认 3）— 以该 ID 为中心的时间线
+   - **query** — 可选；未提供 anchor 时用搜索自动确定锚点
+   - **session_id**、**project**、**limit** — 不使用 anchor 时的回退参数
+   - 返回简短时间线；锚点行会标 `>>>`。
+
+4. **memory_get** — 步骤 3：完整详情（约 500–1000 tokens/条）
+   - **ids**（必填）、**orderBy**（date_asc | date_desc）、**limit**
+   - 返回完整 content、files；content 超过 2000 字符会截断并标「(truncated)」。
+   - **仅在对 search/timeline 筛选后再调用**，避免浪费 token。
+
+这些工具使用与 Worker 相同的 SQLite 数据库；安装并重启 Cursor 后，Agent 即可高效「回忆」历史。
 
 ---
 
@@ -184,7 +195,7 @@ cursor-mem 会把「近期会话摘要 + 最近操作 + 项目关键文件」写
 
 **`<项目根>/.cursor/rules/cursor-mem.mdc`**
 
-该文件带有 `alwaysApply: true`，Cursor 会在每次对话中自动加载，因此 Agent 能直接看到近期历史，而无需每次都查 MCP。
+该文件带有 `alwaysApply: true`，Cursor 会在每次对话中自动加载。文末还包含** MCP 使用提示**（三层工作流），提醒 Agent 在需要更多细节时按 `memory_search` → `memory_timeline` → `memory_get` 查询历史。
 
 ---
 
