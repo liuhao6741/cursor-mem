@@ -38,13 +38,20 @@
 ## Quick start
 
 ```bash
-# Install
-pip install -e .
+# Install from PyPI
+pip install cursor-mem
 
 # One-shot setup (global; applies to all projects)
 cursor-mem install --global
 
 # Restart Cursor
+```
+
+From source (development):
+
+```bash
+pip install -e .
+cursor-mem install --global
 ```
 
 ---

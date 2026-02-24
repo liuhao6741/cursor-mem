@@ -36,13 +36,20 @@
 ## 快速开始
 
 ```bash
-# 安装
-pip install -e .
+# 从 PyPI 安装
+pip install cursor-mem
 
 # 一键配置（全局，所有项目生效）
 cursor-mem install --global
 
 # 重启 Cursor 即可
+```
+
+从源码安装（开发用）：
+
+```bash
+pip install -e .
+cursor-mem install --global
 ```
 
 ---
