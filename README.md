@@ -124,8 +124,6 @@ Registered in `~/.cursor/mcp.json` on install:
 
 ## Project layout
 
-Project root is the `cursor_mem` package (single level, no inner `cursor_mem/` dir):
-
 ```
 cursor-mem/
 ├── cli.py           # CLI entry
@@ -141,6 +139,12 @@ cursor-mem/
 ├── pyproject.toml
 └── README.md
 ```
+
+---
+
+## License
+
+This project is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for the full text.
 
 ---
 

@@ -122,8 +122,6 @@ cursor-mem config set ai.model "gpt-4o-mini"
 
 ## 项目结构
 
-项目根目录即 `cursor_mem` 包（单层结构，无内层 cursor_mem/ 目录）：
-
 ```
 cursor-mem/
 ├── cli.py              # CLI 入口
@@ -139,6 +137,12 @@ cursor-mem/
 ├── pyproject.toml
 └── README.md
 ```
+
+---
+
+## 许可证
+
+本项目采用 **Apache License 2.0**。完整条款见 [LICENSE](LICENSE)。
 
 ---
 
