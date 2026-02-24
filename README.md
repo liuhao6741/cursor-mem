@@ -149,6 +149,14 @@ cursor-mem/
 
 ---
 
+## Documentation
+
+| Doc | English | 中文 |
+|-----|---------|------|
+| **Design** | [DESIGN.md](docs/DESIGN.md) | [DESIGN_CN.md](docs/DESIGN_CN.md) |
+| **Roadmap** | [ROADMAP.md](docs/ROADMAP.md) | [ROADMAP_CN.md](docs/ROADMAP_CN.md) |
+| **User manual** | [USER_MANUAL.md](docs/USER_MANUAL.md) | [USER_MANUAL_CN.md](docs/USER_MANUAL_CN.md) |
+
 ## Testing
 
 - **Automated**: `pip install -e ".[dev]"` then `pytest tests/ -v`
