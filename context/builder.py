@@ -13,6 +13,7 @@ from typing import Any
 from cursor_mem.config import Config
 from cursor_mem.context.compressor import deduplicate_observations, estimate_tokens
 from cursor_mem.storage import session_store, observation_store
+from cursor_mem.storage.time_display import DISPLAY_FMT, utc_to_local
 
 
 def build_context(conn: sqlite3.Connection, project: str, config: Config | None = None) -> str:
@@ -56,7 +57,7 @@ def build_context(conn: sqlite3.Connection, project: str, config: Config | None 
         used_tokens += estimate_tokens(file_section)
         sections.append(file_section)
 
-    footer = f"\n---\n*cursor-mem auto-updated | {datetime.now().strftime('%Y-%m-%d %H:%M')}*\n"
+    footer = f"\n---\n*cursor-mem auto-updated | {datetime.now().strftime(DISPLAY_FMT)}*\n"
     sections.append(footer)
 
     return "\n".join(sections)
@@ -70,7 +71,7 @@ def _build_summaries_section(sessions: list[dict[str, Any]], budget: int) -> str
     for sess in sessions:
         summary = sess.get("summary") or "(无摘要)"
         prompt = sess.get("user_prompt") or ""
-        ts = sess.get("created_at", "")
+        ts = utc_to_local(sess.get("created_at", ""))
 
         entry_lines = [f"### {ts}"]
         if prompt:
@@ -92,7 +93,8 @@ def _build_observations_section(
     session: dict[str, Any], observations: list[dict[str, Any]], budget: int
 ) -> str:
     """Format the latest session's observations."""
-    header = f"## 最近操作 (会话 {session.get('created_at', '')[:16]})\n"
+    session_ts = utc_to_local(session.get("created_at", ""))[:16]
+    header = f"## 最近操作 (会话 {session_ts})\n"
     lines = [header]
     tokens_used = estimate_tokens(header)
 
@@ -100,7 +102,7 @@ def _build_observations_section(
         obs_type = obs.get("type", "")
         title = obs.get("title", "")
         content = obs.get("content", "")
-        ts = obs.get("created_at", "")[11:16]
+        ts = utc_to_local(obs.get("created_at", ""))[11:19]  # HH:MM:SS
 
         if obs_type == "prompt":
             entry = f"- [{ts}] **prompt**: {_truncate(title, 150)}"

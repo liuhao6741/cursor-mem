@@ -16,6 +16,7 @@ from typing import Any
 from cursor_mem.config import Config
 from cursor_mem.storage.database import init_db
 from cursor_mem.storage import search as search_mod, observation_store, session_store
+from cursor_mem.storage.time_display import utc_to_local
 
 
 # ---------------------------------------------------------------------------
@@ -117,7 +118,7 @@ def handle_memory_timeline(args: dict[str, Any], conn) -> str:
 
     lines = ["## Timeline\n"]
     for o in obs:
-        ts = o.get("created_at", "")
+        ts = utc_to_local(o.get("created_at", ""))
         lines.append(f"- [{ts}] **{o.get('type', '')}** #{o['id']}: {o.get('title', '')}")
     return "\n".join(lines)
 
@@ -132,7 +133,7 @@ def handle_memory_get(args: dict[str, Any], conn) -> str:
     for o in obs:
         parts.append(f"### #{o['id']} — {o.get('title', '')} ({o.get('type', '')})")
         parts.append(f"Session: {o.get('session_id', '')}")
-        parts.append(f"Time: {o.get('created_at', '')}")
+        parts.append(f"Time: {utc_to_local(o.get('created_at', ''))}")
         if o.get("content"):
             parts.append(f"```\n{o['content']}\n```")
         if o.get("files"):
