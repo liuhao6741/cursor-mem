@@ -2,6 +2,8 @@
 
 **Cursor IDE 的持久化记忆系统** — 自动记录会话上下文，跨会话保持记忆。
 
+**[English (README.md)](README.md)**
+
 ---
 
 ## 功能
@@ -147,6 +149,14 @@ cursor-mem/
 
 ---
 
+## 文档
+
+| 文档 | English | 中文 |
+|------|---------|------|
+| **设计文档** | [DESIGN.md](docs/DESIGN.md) | [DESIGN_CN.md](docs/DESIGN_CN.md) |
+| **路线图** | [ROADMAP.md](docs/ROADMAP.md) | [ROADMAP_CN.md](docs/ROADMAP_CN.md) |
+| **用户手册** | [USER_MANUAL.md](docs/USER_MANUAL.md) | [USER_MANUAL_CN.md](docs/USER_MANUAL_CN.md) |
+
 ## 测试
 
 - **自动化**：`pip install -e ".[dev]"` 后执行 `pytest tests/ -v`
@@ -158,7 +168,7 @@ cursor-mem/
 
 ---
 
-## 数据存储
+## 数据存储位置
 
 - 数据库：`~/.cursor-mem/cursor-mem.db`
 - 配置：`~/.cursor-mem/config.json`
