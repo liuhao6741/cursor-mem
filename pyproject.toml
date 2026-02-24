@@ -1,0 +1,46 @@
+[project]
+name = "cursor-mem"
+version = "0.1.0"
+description = "Persistent memory system for Cursor IDE — remembers context across sessions"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "cursor-mem contributors"}]
+keywords = ["cursor", "ide", "memory", "ai", "hooks"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development",
+]
+[project.urls]
+Homepage = "https://github.com/YOUR_USERNAME/cursor-mem"
+Repository = "https://github.com/YOUR_USERNAME/cursor-mem"
+Documentation = "https://github.com/YOUR_USERNAME/cursor-mem#readme"
+dependencies = [
+    "click>=8.0",
+    "fastapi>=0.100",
+    "uvicorn[standard]>=0.20",
+    "httpx>=0.24",
+]
+
+[project.optional-dependencies]
+mcp = ["mcp>=1.0"]
+
+[project.scripts]
+cursor-mem = "cursor_mem.cli:main"
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["cursor_mem*"]
+
+[tool.setuptools.package-data]
+cursor_mem = ["ui/*.html"]

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cursor-mem</title>
+<style>
+:root {
+  --bg: #0d1117; --bg2: #161b22; --bg3: #21262d; --border: #30363d;
+  --text: #e6edf3; --text2: #8b949e; --accent: #58a6ff; --green: #3fb950;
+  --orange: #d29922; --red: #f85149; --purple: #bc8cff;
+  --radius: 8px; --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'SF Mono', 'Fira Code', monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
+a { color: var(--accent); text-decoration: none; }
+
+.container { max-width: 960px; margin: 0 auto; padding: 16px; }
+
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px;
+}
+header h1 { font-size: 20px; font-weight: 600; }
+header h1 span { color: var(--accent); }
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 12px; font-size: 12px;
+  background: var(--bg3);
+}
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+.status-dot.offline { background: var(--red); }
+
+.stats-bar {
+  display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.stat-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 16px; flex: 1; min-width: 120px;
+}
+.stat-card .label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card .value { font-size: 24px; font-weight: 600; margin-top: 2px; }
+
+.toolbar {
+  display: flex; gap: 8px; margin-bottom: 16px; align-items: center;
+}
+.search-box {
+  flex: 1; padding: 8px 12px; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text); font-size: 14px; outline: none;
+}
+.search-box:focus { border-color: var(--accent); }
+.filter-btn {
+  padding: 6px 12px; background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); color: var(--text2); font-size: 13px; cursor: pointer;
+}
+.filter-btn.active { border-color: var(--accent); color: var(--accent); }
+
+.tabs { display: flex; gap: 0; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.tab {
+  padding: 8px 16px; font-size: 14px; color: var(--text2); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: all 0.2s;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.session-list, .obs-list { display: flex; flex-direction: column; gap: 8px; }
+
+.session-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 16px; cursor: pointer; transition: border-color 0.2s;
+}
+.session-card:hover { border-color: var(--accent); }
+.session-card .meta {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px;
+}
+.session-card .project { font-size: 13px; color: var(--accent); font-weight: 500; }
+.session-card .time { font-size: 12px; color: var(--text2); }
+.session-card .summary { font-size: 13px; color: var(--text2); }
+.session-card .badge {
+  display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px;
+  background: var(--bg3); color: var(--text2); margin-right: 4px;
+}
+.session-card .badge.active { background: rgba(63, 185, 80, 0.15); color: var(--green); }
+
+.obs-item {
+  display: flex; gap: 12px; padding: 8px 12px; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.obs-item .icon { font-size: 16px; min-width: 24px; text-align: center; padding-top: 2px; }
+.obs-item .body { flex: 1; min-width: 0; }
+.obs-item .title { font-size: 13px; font-family: var(--mono); word-break: break-all; }
+.obs-item .content { font-size: 12px; color: var(--text2); margin-top: 4px; white-space: pre-wrap; max-height: 120px; overflow: hidden; }
+.obs-item .ts { font-size: 11px; color: var(--text2); white-space: nowrap; }
+
+.type-shell .icon { color: var(--green); }
+.type-file_edit .icon { color: var(--orange); }
+.type-mcp .icon { color: var(--purple); }
+.type-prompt .icon { color: var(--accent); }
+
+.empty { text-align: center; padding: 40px; color: var(--text2); }
+.back-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 14px; padding: 4px 0; margin-bottom: 8px; }
+
+@media (max-width: 600px) {
+  .stats-bar { flex-direction: column; }
+  .toolbar { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1><span>cursor</span>-memory</h1>
+    <div class="status-badge"><div class="status-dot" id="statusDot"></div><span id="statusText">connecting...</span></div>
+  </header>
+
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-card"><div class="label">Sessions</div><div class="value" id="statSessions">-</div></div>
+    <div class="stat-card"><div class="label">Observations</div><div class="value" id="statObs">-</div></div>
+    <div class="stat-card"><div class="label">Active</div><div class="value" id="statActive">-</div></div>
+  </div>
+
+  <div class="toolbar">
+    <input class="search-box" id="searchBox" placeholder="Search observations..." />
+    <button class="filter-btn" data-type="" id="filterAll">All</button>
+    <button class="filter-btn" data-type="shell">Shell</button>
+    <button class="filter-btn" data-type="file_edit">Edits</button>
+    <button class="filter-btn" data-type="mcp">MCP</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="sessions">Sessions</div>
+    <div class="tab" data-tab="timeline">Timeline</div>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<script>
+const API = '';
+let currentTab = 'sessions';
+let currentFilter = '';
+let searchTimeout = null;
+let selectedSession = null;
+
+async function api(path) {
+  const r = await fetch(API + path);
+  return r.json();
+}
+
+async function loadStats() {
+  try {
+    const s = await api('/api/stats');
+    document.getElementById('statSessions').textContent = s.sessions_total || 0;
+    document.getElementById('statObs').textContent = s.total_observations || 0;
+    document.getElementById('statActive').textContent = s.sessions_active || 0;
+    setStatus(true);
+  } catch(e) { setStatus(false); }
+}
+
+function setStatus(ok) {
+  document.getElementById('statusDot').className = 'status-dot' + (ok ? '' : ' offline');
+  document.getElementById('statusText').textContent = ok ? 'connected' : 'offline';
+}
+
+const ICONS = { shell: '&#9654;', file_edit: '&#9998;', mcp: '&#9881;', prompt: '&#128172;' };
+
+function renderObs(obs) {
+  const icon = ICONS[obs.type] || '&#8226;';
+  const ts = (obs.created_at || '').slice(11, 16);
+  return `<div class="obs-item type-${obs.type}">
+    <div class="icon">${icon}</div>
+    <div class="body">
+      <div class="title">${esc(obs.title || obs.tool_name || obs.type)}</div>
+      ${obs.content ? `<div class="content">${esc(obs.content)}</div>` : ''}
+    </div>
+    <div class="ts">${ts}</div>
+  </div>`;
+}
+
+function renderSession(s) {
+  const status = s.status === 'active' ? '<span class="badge active">active</span>' : '';
+  const obs_count = s._obs_count !== undefined ? ` (${s._obs_count} obs)` : '';
+  return `<div class="session-card" onclick="openSession('${s.id}')">
+    <div class="meta">
+      <span class="project">${esc(s.project)}${obs_count}</span>
+      <span class="time">${s.created_at || ''}</span>
+    </div>
+    <div>${status}</div>
+    ${s.summary ? `<div class="summary">${esc(s.summary.substring(0, 200))}</div>` : ''}
+    ${s.user_prompt ? `<div class="summary" style="color:var(--accent)">Q: ${esc(s.user_prompt.substring(0, 150))}</div>` : ''}
+  </div>`;
+}
+
+async function loadSessions() {
+  const data = await api('/api/sessions?limit=30');
+  const el = document.getElementById('content');
+  if (!data.sessions || !data.sessions.length) { el.innerHTML = '<div class="empty">No sessions yet.</div>'; return; }
+  el.innerHTML = '<div class="session-list">' + data.sessions.map(renderSession).join('') + '</div>';
+}
+
+async function openSession(id) {
+  selectedSession = id;
+  const data = await api(`/api/sessions/${id}`);
+  const el = document.getElementById('content');
+  const s = data.session;
+  const obs = data.observations || [];
+  let html = `<button class="back-btn" onclick="selectedSession=null;render()">← Back</button>`;
+  html += `<div class="session-card" style="cursor:default;margin-bottom:12px">
+    <div class="meta"><span class="project">${esc(s.project)}</span><span class="time">${s.created_at}</span></div>
+    ${s.user_prompt ? `<div class="summary" style="color:var(--accent)">Q: ${esc(s.user_prompt)}</div>` : ''}
+    ${s.summary ? `<div class="summary">${esc(s.summary)}</div>` : ''}
+  </div>`;
+  html += '<div class="obs-list">' + obs.map(renderObs).join('') + '</div>';
+  el.innerHTML = html;
+}
+
+async function loadTimeline() {
+  const q = document.getElementById('searchBox').value.trim();
+  let url = '/api/timeline?limit=50';
+  if (currentFilter) url += `&type=${currentFilter}`;
+
+  if (q) {
+    url = `/api/search/observations?q=${encodeURIComponent(q)}&limit=30`;
+    if (currentFilter) url += `&type=${currentFilter}`;
+    const data = await api(url);
+    const el = document.getElementById('content');
+    const items = data.results || [];
+    if (!items.length) { el.innerHTML = '<div class="empty">No results.</div>'; return; }
+    el.innerHTML = '<div class="obs-list">' + items.map(renderObs).join('') + '</div>';
+    return;
+  }
+
+  const data = await api(url);
+  const el = document.getElementById('content');
+  const items = data.timeline || [];
+  if (!items.length) { el.innerHTML = '<div class="empty">No observations yet.</div>'; return; }
+  el.innerHTML = '<div class="obs-list">' + items.map(renderObs).join('') + '</div>';
+}
+
+function render() {
+  if (selectedSession) { openSession(selectedSession); return; }
+  if (currentTab === 'sessions') loadSessions();
+  else loadTimeline();
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    currentTab = t.dataset.tab;
+    selectedSession = null;
+    render();
+  });
+});
+
+// Filters
+document.querySelectorAll('.filter-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    currentFilter = b.dataset.type;
+    render();
+  });
+});
+document.getElementById('filterAll').classList.add('active');
+
+// Search
+document.getElementById('searchBox').addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    if (currentTab !== 'timeline') {
+      document.querySelector('[data-tab="timeline"]').click();
+    } else {
+      render();
+    }
+  }, 300);
+});
+
+// SSE
+function connectSSE() {
+  try {
+    const es = new EventSource(API + '/api/events');
+    es.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      if (data.event === 'observation_added' || data.event === 'session_completed') {
+        loadStats();
+        render();
+      }
+    };
+    es.onerror = () => { setTimeout(connectSSE, 5000); };
+  } catch(e) { setTimeout(connectSSE, 5000); }
+}
+
+loadStats();
+render();
+connectSSE();
+setInterval(loadStats, 30000);
+</script>
+</body>
+</html>
