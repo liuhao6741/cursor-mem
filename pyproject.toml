@@ -1,6 +1,6 @@
 [project]
 name = "cursor-mem"
-version = "0.1.0"
+version = "0.1.1"
 description = "Persistent memory system for Cursor IDE — remembers context across sessions"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -26,6 +26,7 @@ dependencies = [
 
 [project.optional-dependencies]
 mcp = ["mcp>=1.0"]
+dev = ["pytest>=7.0", "pytest-cov>=4.0", "httpx>=0.24"]
 
 [project.scripts]
 cursor-mem = "cursor_mem.cli:main"

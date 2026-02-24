@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 
 import click
 
@@ -81,6 +82,9 @@ def start():
 
     pid = start_worker()
     click.echo(f"Worker started (PID {pid})")
+    time.sleep(0.5)
+    if not is_worker_running():
+        click.echo("Worker exited shortly after start. Check logs: " + str(DATA_DIR / "worker-stderr.log"), err=True)
 
 
 @main.command()

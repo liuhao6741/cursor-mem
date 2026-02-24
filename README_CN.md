@@ -147,6 +147,11 @@ cursor-mem/
 
 ---
 
+## 测试
+
+- **自动化**：`pip install -e ".[dev]"` 后执行 `pytest tests/ -v`
+- **在 Cursor 中**：手动测试用例（Hooks、MCP、Worker、CLI）见 [TESTING.md](TESTING.md)
+
 ## 许可证
 
 本项目采用 **Apache License 2.0**。完整条款见 [LICENSE](LICENSE)。

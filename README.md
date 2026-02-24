@@ -149,6 +149,11 @@ cursor-mem/
 
 ---
 
+## Testing
+
+- **Automated**: `pip install -e ".[dev]"` then `pytest tests/ -v`
+- **In Cursor**: See [TESTING.md](TESTING.md) for manual test cases (hooks, MCP, worker, CLI).
+
 ## License
 
 This project is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for the full text.
