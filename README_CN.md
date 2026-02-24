@@ -4,6 +4,8 @@
 
 **[English (README.md)](README.md)**
 
+每次新开对话都要重新说一遍「上次我们改到哪了」？cursor-mem 给 Cursor 装上**跨会话记忆**：自动记录你的编辑、命令和 MCP 调用，把近期会话摘要和关键信息写进 Cursor Rules，下次对话 Agent 直接带着上下文接着干。**不用配 API Key**，一条 `pip install cursor-mem` + `cursor-mem install --global` 就能用；需要细节时再用 MCP 按需查历史，既少重复、又省 token。像 claude-mem 一样「有记性」，专为 Cursor 打造、更轻量。
+
 ---
 
 ## 功能

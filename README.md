@@ -4,6 +4,8 @@
 
 **[中文说明 (README_CN.md)](README_CN.md)**
 
+Tired of re-explaining "where we left off" in every new chat? cursor-mem gives Cursor **persistent memory**: it automatically records your edits, shell commands, and MCP calls, then injects recent session summaries and key context into Cursor Rules so the next conversation picks up right away. **No API key required** — just `pip install cursor-mem` and `cursor-mem install --global`. When the agent needs details, it queries history on demand via MCP, so you say less and use fewer tokens. Like claude-mem, but built for Cursor and lighter.
+
 ---
 
 ## Features
