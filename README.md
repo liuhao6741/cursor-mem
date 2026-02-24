@@ -124,8 +124,10 @@ Registered in `~/.cursor/mcp.json` on install:
 
 ## Project layout
 
+Project root is the `cursor_mem` package (single level, no inner `cursor_mem/` dir):
+
 ```
-cursor_mem/
+cursor-mem/
 ├── cli.py           # CLI entry
 ├── installer.py     # Install logic
 ├── hook_handler.py  # Unified hook handler
@@ -135,7 +137,9 @@ cursor_mem/
 ├── context/         # Context build and inject
 ├── summarizer/      # Rule-based + AI summarizer
 ├── mcp/             # MCP search tools
-└── ui/              # Web viewer
+├── ui/              # Web viewer
+├── pyproject.toml
+└── README.md
 ```
 
 ---

@@ -122,8 +122,10 @@ cursor-mem config set ai.model "gpt-4o-mini"
 
 ## 项目结构
 
+项目根目录即 `cursor_mem` 包（单层结构，无内层 cursor_mem/ 目录）：
+
 ```
-cursor_mem/
+cursor-mem/
 ├── cli.py              # CLI 入口
 ├── installer.py         # 安装逻辑
 ├── hook_handler.py     # Hook 统一处理器
@@ -133,7 +135,9 @@ cursor_mem/
 ├── context/            # 上下文构建与注入
 ├── summarizer/         # 摘要引擎（规则化 + AI）
 ├── mcp/                # MCP 搜索工具
-└── ui/                 # Web 查看器
+├── ui/                 # Web 查看器
+├── pyproject.toml
+└── README.md
 ```
 
 ---

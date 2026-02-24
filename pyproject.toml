@@ -18,10 +18,6 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development",
 ]
-[project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/cursor-mem"
-Repository = "https://github.com/YOUR_USERNAME/cursor-mem"
-Documentation = "https://github.com/YOUR_USERNAME/cursor-mem#readme"
 dependencies = [
     "click>=8.0",
     "fastapi>=0.100",
@@ -35,12 +31,26 @@ mcp = ["mcp>=1.0"]
 [project.scripts]
 cursor-mem = "cursor_mem.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/YOUR_USERNAME/cursor-mem"
+Repository = "https://github.com/YOUR_USERNAME/cursor-mem"
+Documentation = "https://github.com/YOUR_USERNAME/cursor-mem#readme"
+
 [build-system]
 requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-include = ["cursor_mem*"]
+# Root directory is the cursor_mem package (no inner cursor_mem/ folder)
+[tool.setuptools]
+packages = ["cursor_mem", "cursor_mem.context", "cursor_mem.mcp", "cursor_mem.storage", "cursor_mem.summarizer", "cursor_mem.worker"]
+
+[tool.setuptools.package-dir]
+cursor_mem = "."
+"cursor_mem.context" = "context"
+"cursor_mem.mcp" = "mcp"
+"cursor_mem.storage" = "storage"
+"cursor_mem.summarizer" = "summarizer"
+"cursor_mem.worker" = "worker"
 
 [tool.setuptools.package-data]
 cursor_mem = ["ui/*.html"]
