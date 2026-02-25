@@ -27,7 +27,7 @@ def create_app(config: Config | None = None) -> FastAPI:
         app.state.db_conn = conn
         app.state.config = cfg
         app.state.session_manager = SessionManager(conn, cfg)
-        logger.info("cursor-mem worker started on port %d", cfg.port)
+        logger.info("cursor-mem worker started on %s:%d", cfg.host, cfg.port)
         yield
         conn.close()
         logger.info("Database connection closed")
@@ -52,7 +52,7 @@ def run_server(config: Config | None = None) -> None:
 
     cfg = config or Config.load()
     app = create_app(cfg)
-    uvicorn.run(app, host="127.0.0.1", port=cfg.port, log_level="warning")
+    uvicorn.run(app, host=cfg.host, port=cfg.port, log_level="warning")
 
 
 if __name__ == "__main__":

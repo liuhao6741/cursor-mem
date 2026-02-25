@@ -74,7 +74,7 @@ This document describes version planning and feature evolution for cursor-mem.
   - More edge-case tests (no network, worker down, large payloads)
   - Clearer logs and errors
 - **Config and observability**
-  - Configurable Worker bind address (default 127.0.0.1:37800)
+  - Configurable Worker bind address (default 0.0.0.0:37800)
   - Richer status output (e.g. per-project session counts)
 - **Docs and examples**
   - Design doc, user manual, roadmap (this doc)

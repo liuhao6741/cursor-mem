@@ -55,7 +55,7 @@ cursor-mem install
   - `stop`：对话结束时生成摘要并再次刷新上下文
 - **MCP**：在 `~/.cursor/mcp.json` 中注册了 `cursor-mem` 服务器，Agent 可调用：
   - `memory_search`、`memory_timeline`、`memory_get`
-- **Worker**：在后台启动了一个 HTTP 服务（默认 `http://127.0.0.1:37800`），用于接收 Hook 上报的数据、写库、构建并注入上下文。
+- **Worker**：在后台启动了一个 HTTP 服务（默认 `http://0.0.0.0:37800`，可从局域网访问），用于接收 Hook 上报的数据、写库、构建并注入上下文。
 - **数据目录**：默认 `~/.cursor-mem/`，内含：
   - `cursor-mem.db`：SQLite 数据库
   - `config.json`：配置
@@ -96,6 +96,7 @@ cursor-mem config set log_level INFO
 
 | 键 | 说明 | 默认 |
 |----|------|------|
+| host | 绑定地址：`0.0.0.0` 允许局域网/其它设备访问；`127.0.0.1` 仅本机 | 0.0.0.0 |
 | port | Worker 端口 | 37800 |
 | context_budget | 注入上下文的 token 预算（约 4 字符/token） | 3000 |
 | max_sessions_in_context | 注入的最近完成会话数 | 3 |
@@ -104,6 +105,8 @@ cursor-mem config set log_level INFO
 | ai.base_url | AI API 基础 URL | "" |
 | ai.api_key | API Key | "" |
 | ai.model | 模型名 | "" |
+
+默认即允许局域网/其它设备访问；若仅需本机访问，可执行 `cursor-mem config set host 127.0.0.1` 并重启 Worker（`cursor-mem restart`）。**注意**：`0.0.0.0` 时同一网段内任何人都可访问 Web 与 API，且当前无认证，建议仅在可信网络使用，或通过防火墙/反向代理限制访问。
 
 ### 4.3 可选：启用 AI 摘要
 

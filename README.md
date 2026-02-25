@@ -112,12 +112,14 @@ cursor-mem config set ai.model "gpt-4o-mini"
 
 ## Web viewer
 
-After install, open http://127.0.0.1:37800 for:
+After install, open http://127.0.0.1:37800 (or http://\<your-ip\>:37800 from other devices) for:
 
 - Session list and details
 - Observation timeline
 - Full-text search
 - Live SSE updates
+
+By default the viewer is reachable from the LAN; to restrict to local only, run `cursor-mem config set host 127.0.0.1` and `cursor-mem restart`.
 
 ---
 

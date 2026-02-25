@@ -180,7 +180,7 @@ Turns raw hook payloads into a unified structure for storage and context:
 ## 5. Security & Privacy
 
 - Data stays local (`~/.cursor-mem` or configured dir); when AI is enabled, only summary-related text is sent to the user-configured API.
-- Worker binds to 127.0.0.1 by default (Uvicorn), not exposed to the network.
+- Worker binds to 0.0.0.0 by default (Uvicorn), so the Web viewer is reachable from the LAN; set host to 127.0.0.1 to restrict to local only.
 - No API keys in code or default config; set via `cursor-mem config set` into config.json.
 
 ---

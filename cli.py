@@ -46,7 +46,11 @@ def install(global_install: bool):
 
     click.echo()
     click.echo("Done! Restart Cursor to activate hooks.")
-    click.echo(f"Web viewer: http://127.0.0.1:{cfg.port}")
+    if cfg.host == "0.0.0.0":
+        click.echo(f"Web viewer (local): http://127.0.0.1:{cfg.port}")
+        click.echo(f"Web viewer (LAN):    http://<your-ip>:{cfg.port}")
+    else:
+        click.echo(f"Web viewer: http://127.0.0.1:{cfg.port}")
 
 
 @main.command()
@@ -120,6 +124,7 @@ def status():
 
     click.echo("cursor-mem status")
     click.echo(f"  Worker:    {'running' if running else 'stopped'}" + (f" (PID {pid})" if running else ""))
+    click.echo(f"  Host:      {cfg.host}")
     click.echo(f"  Port:      {cfg.port}")
     click.echo(f"  Data dir:  {DATA_DIR}")
     click.echo(f"  AI:        {'enabled' if cfg.ai.enabled else 'disabled'}")

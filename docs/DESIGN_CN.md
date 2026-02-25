@@ -199,7 +199,7 @@ Agent 停止
 ## 5. 安全与隐私
 
 - 数据仅存本地（`~/.cursor-mem` 或指定目录）；可选 AI 时仅将摘要相关文本发送到用户配置的 API。
-- Worker 默认只监听 127.0.0.1（由 Uvicorn 绑定决定），不对外网暴露。
+- Worker 默认绑定 0.0.0.0（Uvicorn），Web 查看器可从局域网访问；将 host 设为 127.0.0.1 可仅限本机。
 - 不在代码或默认配置中硬编码 API Key；通过 `cursor-mem config set` 写入 config.json。
 
 ---

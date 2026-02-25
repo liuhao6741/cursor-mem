@@ -112,12 +112,14 @@ cursor-mem config set ai.model "gpt-4o-mini"
 
 ## Web 查看器
 
-安装后访问 http://127.0.0.1:37800 查看：
+安装后访问 http://127.0.0.1:37800（或从其它设备访问 http://\<本机IP\>:37800）查看：
 
 - 会话列表和详情
 - 操作时间线
 - 全文搜索
 - 实时 SSE 更新
+
+默认支持局域网访问；若仅需本机访问，执行 `cursor-mem config set host 127.0.0.1` 与 `cursor-mem restart`。
 
 ---
 

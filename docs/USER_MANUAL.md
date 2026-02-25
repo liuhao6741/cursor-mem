@@ -54,7 +54,7 @@ cursor-mem install
   - `afterShellExecution` / `afterFileEdit` / `afterMCPExecution`: record each action
   - `stop`: generate summary and refresh context when the conversation ends
 - **MCP**: Registers the `cursor-mem` server in `~/.cursor/mcp.json`; the agent can call `memory_search`, `memory_timeline`, `memory_get`.
-- **Worker**: Starts an HTTP service in the background (default `http://127.0.0.1:37800`) to receive hook data, write to the DB, and build/inject context.
+- **Worker**: Starts an HTTP service in the background (default `http://0.0.0.0:37800`, reachable from LAN) to receive hook data, write to the DB, and build/inject context.
 - **Data directory**: Default `~/.cursor-mem/` with `cursor-mem.db`, `config.json`, `logs/`, `worker.pid`.
 
 ---
@@ -87,6 +87,7 @@ cursor-mem config set log_level INFO
 
 | Key | Description | Default |
 |-----|-------------|---------|
+| host | Bind address: `0.0.0.0` allows LAN/other devices; `127.0.0.1` local only | 0.0.0.0 |
 | port | Worker port | 37800 |
 | context_budget | Token budget for injected context (~4 chars/token) | 3000 |
 | max_sessions_in_context | Number of recent completed sessions to inject | 3 |
@@ -95,6 +96,8 @@ cursor-mem config set log_level INFO
 | ai.base_url | AI API base URL | "" |
 | ai.api_key | API key | "" |
 | ai.model | Model name | "" |
+
+By default the Web viewer is reachable from other devices on the LAN; to restrict to local only, run `cursor-mem config set host 127.0.0.1` and restart the worker (`cursor-mem restart`). **Note**: With `0.0.0.0`, anyone on the same network can access the Web UI and API; there is no authentication. Use only on trusted networks or restrict access via firewall/reverse proxy.
 
 ### 4.3 Optional: enable AI summarization
 
